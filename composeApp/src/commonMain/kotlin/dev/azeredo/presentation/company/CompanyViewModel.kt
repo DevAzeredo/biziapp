@@ -1,4 +1,4 @@
-package dev.azeredo.presentation
+package dev.azeredo.presentation.company
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

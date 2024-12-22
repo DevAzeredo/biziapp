@@ -1,4 +1,4 @@
-package dev.azeredo.presentation
+package dev.azeredo.presentation.employee
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

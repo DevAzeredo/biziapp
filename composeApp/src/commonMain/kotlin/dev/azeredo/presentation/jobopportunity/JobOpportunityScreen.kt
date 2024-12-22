@@ -1,4 +1,4 @@
-package dev.azeredo.presentation
+package dev.azeredo.presentation.jobopportunity
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

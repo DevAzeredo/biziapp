@@ -1,4 +1,4 @@
-package dev.azeredo.presentation
+package dev.azeredo.presentation.main
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -44,6 +44,9 @@ import com.dokar.sonner.listenMany
 import com.dokar.sonner.rememberToasterState
 import dev.azeredo.JobOpportunity
 import dev.azeredo.UiMessage
+import dev.azeredo.presentation.company.CompanyScreen
+import dev.azeredo.presentation.employee.EmployeeScreen
+import dev.azeredo.presentation.jobopportunity.JobOpportunityScreen
 import dev.azeredo.toToast
 import kotlinx.coroutines.flow.map
 import org.koin.compose.viewmodel.koinViewModel

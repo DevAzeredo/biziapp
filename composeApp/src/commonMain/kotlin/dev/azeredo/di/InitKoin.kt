@@ -1,10 +1,10 @@
 package dev.azeredo.di
 
 import dev.azeredo.WebSocketManager
-import dev.azeredo.presentation.CompanyViewModel
-import dev.azeredo.presentation.EmployeeViewModel
-import dev.azeredo.presentation.JobOpportunityViewModel
-import dev.azeredo.presentation.MainViewModel
+import dev.azeredo.presentation.company.CompanyViewModel
+import dev.azeredo.presentation.employee.EmployeeViewModel
+import dev.azeredo.presentation.jobopportunity.JobOpportunityViewModel
+import dev.azeredo.presentation.main.MainViewModel
 import dev.azeredo.api.HttpClientProvider
 import dev.azeredo.repositories.EmployeeRepository
 import io.ktor.client.HttpClient

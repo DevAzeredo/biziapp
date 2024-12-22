@@ -1,5 +1,6 @@
 package dev.azeredo.repositories
 
+import dev.azeredo.Constants.BASE_URL
 import dev.azeredo.Employee
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -17,7 +18,7 @@ import kotlinx.coroutines.withContext
 class EmployeeRepository(private val httpClient: HttpClient) {
     suspend fun createOrUpdateEmployee(employee: Employee): Employee {
         val response: Employee = withContext(Dispatchers.IO) {
-            httpClient.post("$BASE_URL/employees") {
+            httpClient.post("https://$BASE_URL/employees") {
                 headers {
                     append(HttpHeaders.ContentType, "application/json")
                 }
@@ -27,9 +28,5 @@ class EmployeeRepository(private val httpClient: HttpClient) {
         }
 
         return response
-    }
-
-    companion object {
-        const    val BASE_URL = "http://api.example.com/"
     }
 }

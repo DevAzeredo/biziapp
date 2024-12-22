@@ -1,6 +1,5 @@
-package dev.azeredo.presentation
+package dev.azeredo.presentation.main
 
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.azeredo.JobOpportunity

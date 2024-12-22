@@ -1,4 +1,4 @@
-package dev.azeredo.presentation
+package dev.azeredo.presentation.jobopportunity
 
 import androidx.lifecycle.ViewModel
 import dev.azeredo.JobOpportunity
