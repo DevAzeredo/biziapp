@@ -5,8 +5,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,60 +22,75 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import dev.azeredo.presentation.employee.EmployeeViewModel
+import dev.azeredo.presentation.login.LoginViewModel
+import dev.azeredo.presentation.main.MainScreen
 import dev.azeredo.presentation.register.RegisterScreen
+import org.koin.compose.viewmodel.koinViewModel
 
 class LoginScreen : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        LoginScreenContent(navigator)
+        val viewModel = koinViewModel<LoginViewModel>()
+        val uiState by viewModel.uiState.collectAsState()
+        if (uiState.loged) {
+            navigator.push(MainScreen())
+        }
+        LoginScreenContent(navigator, uiState, viewModel)
     }
 }
 
 @Composable
-fun LoginScreenContent(navigator: Navigator) {
-    var login by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+fun LoginScreenContent(
+    navigator: Navigator, uiState: LoginViewModel.LoginUiState, viewModel: LoginViewModel
+) {
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "Login", style = androidx.compose.material3.MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(16.dp))
-        androidx.compose.material.OutlinedTextField(
-            value = login,
-            onValueChange = { login = it },
-            label = { Text("Login") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        androidx.compose.material.OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        androidx.compose.material.Button(
-            onClick = {
-                // Implementar lógica de autenticação
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Log In")
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        androidx.compose.material.TextButton(onClick = {
-            navigator.push(RegisterScreen())
-        }) {
-            Text("Don't have an account? Register here")
+        if (uiState.isLoading) {
+            CircularProgressIndicator() // Mostra o indicador de progresso
+        } else {
+            Text(
+                text = "Login",
+                style = androidx.compose.material3.MaterialTheme.typography.headlineMedium
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(value = uiState.login, onValueChange = {
+                viewModel.onFieldChange(
+                    LoginViewModel.LoginField.Login, it
+                )
+            }, label = { Text("Login") }, singleLine = true, modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(value = uiState.password,
+                onValueChange = {
+                    viewModel.onFieldChange(
+                        LoginViewModel.LoginField.Password, it
+                    )
+                },
+                label = { Text("Password") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = {
+                    viewModel.onSubmit()
+                }, modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Log In")
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            androidx.compose.material.TextButton(onClick = {
+                navigator.push(RegisterScreen())
+            }) {
+                Text("Don't have an account? Register here")
+            }
         }
     }
 }

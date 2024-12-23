@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,15 +25,23 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.BlendMode.Companion.Color
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.dokar.sonner.Toaster
+import com.dokar.sonner.listenMany
+import com.dokar.sonner.rememberToasterState
+import dev.azeredo.UiMessage
+import dev.azeredo.toToast
+import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -68,6 +77,15 @@ fun EmployeeScreen(
     uiState: EmployeeViewModel.EmployeeUiState,
     navigator: Navigator
 ) {
+    val toaster = rememberToasterState(
+        onToastDismissed = { viewModel.removeUiMessageById(it.id as Long) },
+    )
+    LaunchedEffect(viewModel, toaster) {
+        val toastsFlow = viewModel.uiState.map { it.uiMessages.map(UiMessage::toToast) }
+        toaster.listenMany(toastsFlow)
+    }
+    Toaster(state = toaster, richColors = true)
+
     val scrollState = rememberScrollState()
     Scaffold(
         topBar = { TopBar(navigator) },
@@ -154,8 +172,15 @@ fun EmployeeScreen(
                         onCheckedChange = { viewModel.toggleAvailability() }
                     )
                 }
-                Button(onClick = { viewModel.onSubmit() }) {
-                    Text("Submit")
+                Button(onClick = { viewModel.onSubmit() },   enabled = !uiState.isSubmitting,) {
+                    if (uiState.isSubmitting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("Submit")
+                    }
                 }
             }
         }

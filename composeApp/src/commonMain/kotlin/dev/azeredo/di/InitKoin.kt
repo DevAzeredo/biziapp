@@ -4,8 +4,11 @@ import dev.azeredo.WebSocketManager
 import dev.azeredo.presentation.company.CompanyViewModel
 import dev.azeredo.presentation.employee.EmployeeViewModel
 import dev.azeredo.presentation.jobopportunity.JobOpportunityViewModel
+import dev.azeredo.presentation.register.RegisterViewModel
 import dev.azeredo.presentation.main.MainViewModel
 import dev.azeredo.api.HttpClientProvider
+import dev.azeredo.presentation.login.LoginViewModel
+import dev.azeredo.repositories.AuthRepository
 import dev.azeredo.repositories.EmployeeRepository
 import io.ktor.client.HttpClient
 import org.koin.core.context.startKoin
@@ -27,8 +30,11 @@ val appModule = module {
     viewModelOf(::MainViewModel)
     viewModelOf(::JobOpportunityViewModel)
     viewModelOf(::CompanyViewModel)
+    viewModelOf(::LoginViewModel)
+    viewModelOf(::RegisterViewModel)
     single<HttpClient> { HttpClientProvider.client }
     single { EmployeeRepository(get()) }
+    single { AuthRepository(get()) }
     single { WebSocketManager(get()) }
 }
 
