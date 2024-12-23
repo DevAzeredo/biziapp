@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -85,7 +86,6 @@ fun EmployeeScreen(
         toaster.listenMany(toastsFlow)
     }
     Toaster(state = toaster, richColors = true)
-
     val scrollState = rememberScrollState()
     Scaffold(
         topBar = { TopBar(navigator) },
@@ -93,7 +93,8 @@ fun EmployeeScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
+                .padding(paddingValues)
+                .imePadding(),
             contentAlignment = Alignment.Center,
             ) {
             Column(

@@ -10,6 +10,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,10 +23,16 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.dokar.sonner.Toaster
+import com.dokar.sonner.listenMany
+import com.dokar.sonner.rememberToasterState
+import dev.azeredo.UiMessage
 import dev.azeredo.presentation.employee.EmployeeViewModel
 import dev.azeredo.presentation.login.LoginViewModel
 import dev.azeredo.presentation.main.MainScreen
 import dev.azeredo.presentation.register.RegisterScreen
+import dev.azeredo.toToast
+import kotlinx.coroutines.flow.map
 import org.koin.compose.viewmodel.koinViewModel
 
 class LoginScreen : Screen {
@@ -45,14 +52,21 @@ class LoginScreen : Screen {
 fun LoginScreenContent(
     navigator: Navigator, uiState: LoginViewModel.LoginUiState, viewModel: LoginViewModel
 ) {
-
+    val toaster = rememberToasterState(
+        onToastDismissed = { viewModel.removeUiMessageById(it.id as Long) },
+    )
+    LaunchedEffect(viewModel, toaster) {
+        val toastsFlow = viewModel.uiState.map { it.uiMessages.map(UiMessage::toToast) }
+        toaster.listenMany(toastsFlow)
+    }
+    Toaster(state = toaster, richColors = true)
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         if (uiState.isLoading) {
-            CircularProgressIndicator() // Mostra o indicador de progresso
+            CircularProgressIndicator()
         } else {
             Text(
                 text = "Login",

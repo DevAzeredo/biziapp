@@ -1,18 +1,20 @@
 package dev.azeredo
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class Employee(
     val id: Long? = null,
-    val fullName: String,
-    val dateOfBirth: String,
+    @SerialName("full_name") val fullName: String,
+    @SerialName("date_of_birth") val dateOfBirth: String,
     val gender: String? = null,
     val email: String,
     val phone: String,
-    val residentialAddress: String,
-    val isAvailable: Boolean,
-    val lastKnownLocation: Location? = null,
+    @SerialName("residential_address") val residentialAddress: String,
+    @SerialName("is_available") val isAvailable: Boolean,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
     val rating: Double
 )
 
@@ -22,24 +24,24 @@ data class Company(
     val name: String = "",
     val description: String = "",
     val address: String = "",
-    val logoUrl: String? = null
+    @SerialName("logo_url") val logoUrl: String? = null
 )
 
 @Serializable
 data class JobOpportunity(
     val id: Long? = null,
-    val companyId: Long? = null,
+    @SerialName("company_id") val companyId: Long? = null,
     val title: String,
     val description: String,
     val category: String,
     val address: String,
     val location: Location,
-    val startDateTime: String,
-    val durationInHours: Int,
-    val payRate: Double,
+    @SerialName("start_date_time") val startDateTime: String,
+    @SerialName("duration_in_hours")  val durationInHours: Int,
+    @SerialName("pay_rate")  val payRate: Double,
     val status: JobStatus,
-    val companyName: String,
-    val companyLogoUrl: String? = null
+    @SerialName("company_name") val companyName: String,
+    @SerialName("company_logo_url") val companyLogoUrl: String? = null
 )
 
 @Serializable

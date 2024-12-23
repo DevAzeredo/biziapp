@@ -17,7 +17,7 @@ class EmployeeViewModel(private val repository: EmployeeRepository) : ViewModel(
     private val _uiState = MutableStateFlow(EmployeeUiState())
     val uiState: StateFlow<EmployeeUiState> get() = _uiState.asStateFlow()
     fun onSubmit() {
-        _uiState.value =_uiState.value.copy(isSubmitting = true)
+        _uiState.value = _uiState.value.copy(isSubmitting = true)
         viewModelScope.launch {
             val uiState = _uiState.value
             val employee = Employee(
@@ -28,25 +28,22 @@ class EmployeeViewModel(private val repository: EmployeeRepository) : ViewModel(
                 phone = uiState.phone,
                 residentialAddress = uiState.residentialAddress,
                 isAvailable = uiState.isAvailable,
-                lastKnownLocation = null, 
+                latitude = 0.0,
+                longitude = 0.0,
                 rating = uiState.rating
             )
-
             try {
-
-            repository.createOrUpdateEmployee(employee)
+                repository.createOrUpdateEmployee(employee)
                 addUiMessage(
                     UiMessage.Success(
-                        id = Clock.System.now().toEpochMilliseconds(),
-                        message = "Sent successfully"
+                        id = Clock.System.now().toEpochMilliseconds(), message = "Sent successfully"
                     )
                 )
-                _uiState.value =_uiState.value.copy(isSubmitting = false, sent = true)
+                _uiState.value = _uiState.value.copy(isSubmitting = false, sent = true)
             } catch (e: Exception) {
                 addUiMessage(
                     UiMessage.Error(
-                        id = Clock.System.now().toEpochMilliseconds(),
-                        message = "${e.message}"
+                        id = Clock.System.now().toEpochMilliseconds(), message = "${e.message}"
                     )
                 )
             }
@@ -54,16 +51,15 @@ class EmployeeViewModel(private val repository: EmployeeRepository) : ViewModel(
     }
 
     fun onFieldChange(field: EmployeeField, value: String) {
-        _uiState.value =
-            when (field) {
-                EmployeeField.FullName -> _uiState.value.copy(fullName = value)
-                EmployeeField.DateOfBirth -> _uiState.value.copy(dateOfBirth = value)
-                EmployeeField.Gender -> _uiState.value.copy(gender = value)
-                EmployeeField.Email -> _uiState.value.copy(email = value)
-                EmployeeField.Phone -> _uiState.value.copy(phone = value)
-                EmployeeField.ResidentialAddress -> _uiState.value.copy(residentialAddress = value)
-                EmployeeField.Rating -> _uiState.value.copy(rating = value.toDoubleOrNull() ?: 0.0)
-            }
+        _uiState.value = when (field) {
+            EmployeeField.FullName -> _uiState.value.copy(fullName = value)
+            EmployeeField.DateOfBirth -> _uiState.value.copy(dateOfBirth = value)
+            EmployeeField.Gender -> _uiState.value.copy(gender = value)
+            EmployeeField.Email -> _uiState.value.copy(email = value)
+            EmployeeField.Phone -> _uiState.value.copy(phone = value)
+            EmployeeField.ResidentialAddress -> _uiState.value.copy(residentialAddress = value)
+            EmployeeField.Rating -> _uiState.value.copy(rating = value.toDoubleOrNull() ?: 0.0)
+        }
     }
 
     fun toggleAvailability() {
@@ -90,8 +86,8 @@ class EmployeeViewModel(private val repository: EmployeeRepository) : ViewModel(
         val residentialAddress: String = "",
         val isAvailable: Boolean = true,
         val rating: Double = 0.0,
-        val isSubmitting:Boolean = false,
-        val sent:Boolean = false,
+        val isSubmitting: Boolean = false,
+        val sent: Boolean = false,
         val uiMessages: List<UiMessage> = emptyList()
     )
 
