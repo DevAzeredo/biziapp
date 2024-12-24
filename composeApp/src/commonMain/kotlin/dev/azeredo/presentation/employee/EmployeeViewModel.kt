@@ -3,6 +3,7 @@ package dev.azeredo.presentation.employee
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.azeredo.Employee
+import dev.azeredo.EmployeeManager
 import dev.azeredo.UiMessage
 import dev.azeredo.repositories.EmployeeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +17,23 @@ class EmployeeViewModel(private val repository: EmployeeRepository) : ViewModel(
 
     private val _uiState = MutableStateFlow(EmployeeUiState())
     val uiState: StateFlow<EmployeeUiState> get() = _uiState.asStateFlow()
+
+    init {
+        val employee = EmployeeManager.currentEmployee
+        if (employee != null) {
+            _uiState.value = _uiState.value.copy(
+                fullName = employee.fullName,
+                dateOfBirth = employee.dateOfBirth,
+                gender = employee.gender ?: "",
+                email = employee.email,
+                phone = employee.phone,
+                residentialAddress = employee.residentialAddress,
+                isAvailable = employee.isAvailable,
+                rating = employee.rating
+            )
+        }
+    }
+
     fun onSubmit() {
         _uiState.value = _uiState.value.copy(isSubmitting = true)
         viewModelScope.launch {
@@ -33,12 +51,13 @@ class EmployeeViewModel(private val repository: EmployeeRepository) : ViewModel(
                 rating = uiState.rating
             )
             try {
-                repository.createOrUpdateEmployee(employee)
+                val employeUpdated = repository.createOrUpdateEmployee(employee)
                 addUiMessage(
                     UiMessage.Success(
                         id = Clock.System.now().toEpochMilliseconds(), message = "Sent successfully"
                     )
                 )
+                EmployeeManager.updateEmployee(employeUpdated)
                 _uiState.value = _uiState.value.copy(isSubmitting = false, sent = true)
             } catch (e: Exception) {
                 addUiMessage(

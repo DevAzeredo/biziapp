@@ -92,6 +92,8 @@ kotlin {
             implementation(libs.coil.compose)
             implementation(libs.coil.network.okhttp)
             implementation("io.coil-kt.coil3:coil-compose:3.0.4")
+            implementation("com.mohamedrejeb.calf:calf-file-picker:0.6.1")
+            implementation("com.mohamedrejeb.calf:calf-file-picker-coil:0.5.1")
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -101,6 +103,13 @@ kotlin {
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.ktor.client.java)
         }
+        val skikoMain by creating {
+            dependsOn(commonMain.get())
+        }
+        jsMain.get().dependsOn(skikoMain)
+        jvmMain.get().dependsOn(skikoMain)
+        nativeMain.get().dependsOn(skikoMain)
+        wasmJsMain.get().dependsOn(skikoMain)
     }
 }
 

@@ -2,9 +2,13 @@ package dev.azeredo.presentation.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.azeredo.CompanyManager
+import dev.azeredo.EmployeeManager
 import dev.azeredo.JobOpportunity
 import dev.azeredo.UiMessage
 import dev.azeredo.WebSocketManager
+import dev.azeredo.repositories.CompanyRepository
+import dev.azeredo.repositories.EmployeeRepository
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,9 +17,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.serialization.json.Json
 
 
-class MainViewModel(private val webSocketManager: WebSocketManager) : ViewModel() {
+class MainViewModel(private val webSocketManager: WebSocketManager,private val employeeRepository: EmployeeRepository, private val companyRepository: CompanyRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> get() = _uiState.asStateFlow()
@@ -24,40 +29,61 @@ class MainViewModel(private val webSocketManager: WebSocketManager) : ViewModel(
         viewModelScope.launch {
             webSocketManager.connect()
             collectWebSocketMessages()
-        }
-    }
-
-    fun sendAcceptanceResponse(jobId: Long) {
-        if (_uiState.value.jobAccepted != null) {
-            viewModelScope.launch {
-                val response = """
-                {
-                    "type": "job_response",
-                    "employeeId": ${_uiState.value.employeeId},
-                    "jobId": $jobId,
-                    "accepted": true
-                }
-            """.trimIndent()
-                webSocketManager.sendMessage(response)
+            val employe = employeeRepository.getEmployee()
+            if ((employe.id ?: 0) > 0) {
+                EmployeeManager.updateEmployee(employe)
+            }
+            val company = companyRepository.getCompany()
+            if ((company.id ?: 0) > 0) {
+                CompanyManager.updateCompany(company)
             }
         }
     }
 
+//
+//    fun sendAcceptanceResponse(jobId: Long) {
+//        if (_uiState.value.jobAccepted != null) {
+//            viewModelScope.launch {
+//                val response = """
+//                {
+//                    "type": "job_response",
+//                    "employeeId": ${_uiState.value.employeeId},
+//                    "jobId": $jobId,
+//                    "accepted": true
+//                }
+//            """.trimIndent()
+//                webSocketManager.sendMessage(response)
+//            }
+//        }
+//    }
+
     private fun collectWebSocketMessages() {
         viewModelScope.launch {
-            // Coleta frames diretamente
             webSocketManager.session?.incoming?.receiveAsFlow()?.collect { frame ->
                 if (frame is Frame.Text) {
                     val message = frame.readText()
-                    println("Mensagem recebida: $message")
+                    println("Nova oportunidade recebida")
                     addUiMessage(
                         UiMessage.Success(
                             id = Clock.System.now().toEpochMilliseconds(),
                             message = message
                         )
                     )
+                    try {
+                        val jobOpportunity = Json.decodeFromString<JobOpportunity>(message)
+                        addJobOpportunity(jobOpportunity)
+                    } catch (e: Exception) {
+                        println("Erro ao interpretar o objeto recebido: ${e.message}")
+                    }
+
                 }
             }
+        }
+    }
+
+    private fun addJobOpportunity(job: JobOpportunity) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(jobAccepted = job, foundedJob = true)
         }
     }
 
@@ -81,6 +107,7 @@ class MainViewModel(private val webSocketManager: WebSocketManager) : ViewModel(
     data class MainUiState(
         val nome: String = "",
         val isSearchingJob: Boolean = false,
+        val foundedJob: Boolean = false,
         val isSearchingEmployee: Boolean = false,
         val jobAccepted: JobOpportunity? = null,
         val employeeId: Long? = null,

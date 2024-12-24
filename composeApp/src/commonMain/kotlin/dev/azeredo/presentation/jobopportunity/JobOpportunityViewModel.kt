@@ -1,14 +1,21 @@
 package dev.azeredo.presentation.jobopportunity
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dev.azeredo.CompanyManager
 import dev.azeredo.JobOpportunity
 import dev.azeredo.JobStatus
 import dev.azeredo.Location
+import dev.azeredo.UiMessage
+import dev.azeredo.repositories.CompanyRepository
+import dev.azeredo.repositories.JobOpportunityRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 
-class JobOpportunityViewModel : ViewModel() {
+class JobOpportunityViewModel(private val repository: JobOpportunityRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(JobOpportunityUiState())
     val uiState: StateFlow<JobOpportunityUiState> get() = _uiState.asStateFlow()
@@ -24,7 +31,7 @@ class JobOpportunityViewModel : ViewModel() {
             JobOpportunityField.Address -> _uiState.value.copy(address = value)
             JobOpportunityField.StartDateTime -> _uiState.value.copy(startDateTime = value)
             JobOpportunityField.DurationInHours -> _uiState.value.copy(
-                durationInHours =  ""
+                durationInHours = ""
             )
 
             JobOpportunityField.PayRate -> _uiState.value.copy(
@@ -33,43 +40,73 @@ class JobOpportunityViewModel : ViewModel() {
         }
     }
 
-    fun setLocation(latitude: Double, longitude: Double) {
-        _uiState.value = _uiState.value.copy(location = Location(latitude, longitude))
+    private fun addUiMessage(message: UiMessage) {
+        _uiState.value = _uiState.value.copy(uiMessages = _uiState.value.uiMessages + message)
     }
 
-    fun submit(onSubmit: (JobOpportunity) -> Unit) {
-        val uiState = _uiState.value
-        val jobOpportunity = JobOpportunity(
-            id = 0L,
-            title = uiState.title,
-            description = uiState.description,
-            companyName = uiState.companyName,
-            companyLogoUrl = uiState.companyLogoUrl,
-            category = uiState.category,
-            address = uiState.address,
-            location = uiState.location ?: Location(0.0, 0.0),
-            startDateTime = uiState.startDateTime,
-            durationInHours = 1,
-            payRate = 1.0,
-            status = JobStatus.OPEN
-        )
-        onSubmit(jobOpportunity)
+    fun removeUiMessageById(id: Long) {
+        viewModelScope.launch {
+            _uiState.value =
+                _uiState.value.copy(uiMessages = _uiState.value.uiMessages.filterNot { msg -> msg.id == id })
+        }
     }
-}
 
-data class JobOpportunityUiState(
-    val title: String = "",
-    val description: String = "",
-    val companyName: String = "",
-    val companyLogoUrl: String? = null,
-    val category: String = "",
-    val address: String = "",
-    val location: Location? = null,
-    val startDateTime: String = "",
-    val durationInHours: String = "",
-    val payRate:String = ""
-)
+    fun onSubmit() {
+        _uiState.value = _uiState.value.copy(isSubmitting = true)
+        viewModelScope.launch {
+            val uiState = _uiState.value
+            val jobOpportunity = JobOpportunity(
+                title = uiState.title,
+                description = uiState.description,
+                companyName = uiState.companyName,
+                companyLogoUrl = uiState.companyLogoUrl,
+                category = uiState.category,
+                address = uiState.address,
+                startDateTime = uiState.startDateTime,
+                durationInHours = uiState.durationInHours.toInt(),
+                payRate = uiState.payRate.toDouble(),
+                status = JobStatus.OPEN,
+                companyId = CompanyManager.currentCompany?.id,
+                latitude = 0.0,
+                longitude = 0.0
+            )
 
-enum class JobOpportunityField {
-    Title, Description, CompanyName, CompanyLogoUrl, Category, Address, StartDateTime, DurationInHours, PayRate
+            try {
+               repository.createJobOpportunity(jobOpportunity)
+                addUiMessage(
+                    UiMessage.Success(
+                        id = Clock.System.now().toEpochMilliseconds(), message = "Sent successfully"
+                    )
+                )
+                _uiState.value = _uiState.value.copy(isSubmitting = false, sent = true)
+            } catch (e: Exception) {
+                addUiMessage(
+                    UiMessage.Error(
+                        id = Clock.System.now().toEpochMilliseconds(), message = "${e.message}"
+                    )
+                )
+            }
+        }
+    }
+
+
+    data class JobOpportunityUiState(
+        val title: String = "",
+        val description: String = "",
+        val companyName: String = "",
+        val companyLogoUrl: String? = null,
+        val category: String = "",
+        val address: String = "",
+        val location: Location? = null,
+        val startDateTime: String = "",
+        val durationInHours: String = "",
+        val payRate: String = "",
+        val isSubmitting: Boolean = false,
+        val sent: Boolean = false,
+        val uiMessages: List<UiMessage> = emptyList()
+    )
+
+    enum class JobOpportunityField {
+        Title, Description, CompanyName, CompanyLogoUrl, Category, Address, StartDateTime, DurationInHours, PayRate
+    }
 }

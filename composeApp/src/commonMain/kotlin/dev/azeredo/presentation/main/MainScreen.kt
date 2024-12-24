@@ -63,8 +63,6 @@ class MainScreen : Screen {
 
 @Composable
 fun MainScreen(navigator: Navigator, viewModel: MainViewModel, uiState: MainViewModel.MainUiState) {
-    val jobOpportunities = remember { mutableStateListOf<JobOpportunity>() }
-    val selectedJob = remember { mutableStateOf<JobOpportunity?>(null) }
     val toaster = rememberToasterState(
         onToastDismissed = { viewModel.removeUiMessageById(it.id as Long) },
     )
@@ -77,67 +75,52 @@ fun MainScreen(navigator: Navigator, viewModel: MainViewModel, uiState: MainView
         floatingActionButton = { ProductFabMenu(navigator) },
     ) {
         Box(Modifier.fillMaxSize()) {
-            JobPlaceholder(
-                modifier = Modifier.fillMaxSize(),
-                isSearching = uiState.isSearchingJob,
-                jobOpportunities = jobOpportunities,
-                onJobSelected = selectedJob
-            )
+            Box(modifier = Modifier.background(Color.Gray)) {
+                when {
+                    uiState.isSearchingJob -> {
+                        Column(
+                            modifier = Modifier.align(Alignment.Center),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CircularProgressIndicator(color = Color.White, strokeWidth = 4.dp)
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text("Looking for a job...", color = Color.White)
+                        }
+                    }
+
+                    uiState.foundedJob && (uiState.jobAccepted?.id ?:0)>0 -> {
+                        JobItem(uiState.jobAccepted!!)
+                    }
+
+                    else -> {
+                        Text(
+                            "There are no opportunities available",
+                            Modifier.align(Alignment.Center),
+                            color = Color.White
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-fun JobPlaceholder(
-    modifier: Modifier = Modifier,
-    isSearching: Boolean,
-    jobOpportunities: List<JobOpportunity>,
-    onJobSelected: MutableState<JobOpportunity?>
-) {
-    Box(modifier = modifier.background(Color.Gray)) {
-        when {
-            isSearching -> {
-                Column(
-                    modifier = Modifier.align(Alignment.Center),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator(color = Color.White, strokeWidth = 4.dp)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("Looking for a job...", color = Color.White)
-                }
-            }
-
-            jobOpportunities.isNotEmpty() -> {
-                val companyLogoUrl = jobOpportunities.first().companyLogoUrl
-                if (companyLogoUrl != null) {
-                    AsyncImage(
-                        model = companyLogoUrl,
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-                Column(
-                    Modifier
-                        .align(Alignment.TopStart)
-                        .padding(16.dp)
-                ) {
-                    jobOpportunities.forEach { job ->
-                        TextButton(onClick = { onJobSelected.value = job }) {
-                            Text("Job: ${job.title}")
-                        }
-                    }
-                }
-            }
-
-            else -> {
-                Text(
-                    "There are no opportunities available",
-                    Modifier.align(Alignment.Center),
-                    color = Color.White
-                )
-            }
+fun JobItem(job: JobOpportunity) {
+    Column(
+        modifier = Modifier.padding(8.dp).background(Color.LightGray).padding(8.dp)
+    ) {
+        job.companyLogoUrl?.let {
+            AsyncImage(
+                model = it,
+                contentDescription = "Company Logo",
+                modifier = Modifier.height(64.dp),
+                contentScale = ContentScale.Fit
+            )
         }
+        Text(text = job.title, color = Color.Black)
+        Text(text = job.companyName ?: "Unknown Company", color = Color.Black)
+        Text(text = job.description, color = Color.Black)
     }
 }
 
@@ -148,8 +131,7 @@ fun ProductFabMenu(navigator: Navigator) {
         FloatingActionButton(onClick = { isFabMenuExpanded = !isFabMenuExpanded },
             content = { Icon(Icons.Default.Menu, contentDescription = "Options") })
 
-        DropdownMenu(
-            expanded = isFabMenuExpanded,
+        DropdownMenu(expanded = isFabMenuExpanded,
             onDismissRequest = { isFabMenuExpanded = false }) {
             DropdownMenuItem(text = { Text("Employee") }, onClick = {
                 isFabMenuExpanded = false

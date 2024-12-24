@@ -30,4 +30,14 @@ class EmployeeRepository(private val httpClient: HttpClient) {
 
         return response
     }
+
+    suspend fun getEmployee(): Employee {
+        return withContext(Dispatchers.IO) {
+            httpClient.get("https://$BASE_URL/employees") {
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer ${AuthManager.getToken()}")
+                }
+            }.body()
+        }
+    }
 }

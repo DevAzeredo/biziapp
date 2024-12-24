@@ -14,3 +14,5 @@ fun UiMessage.toToast(): Toast = when (this) {
     is UiMessage.Error -> Toast(id = id, message = message, type = ToastType.Error)
     is UiMessage.Success -> Toast(id = id, message = message, type = ToastType.Success)
 }
+
+

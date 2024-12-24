@@ -9,7 +9,9 @@ import dev.azeredo.presentation.main.MainViewModel
 import dev.azeredo.api.HttpClientProvider
 import dev.azeredo.presentation.login.LoginViewModel
 import dev.azeredo.repositories.AuthRepository
+import dev.azeredo.repositories.CompanyRepository
 import dev.azeredo.repositories.EmployeeRepository
+import dev.azeredo.repositories.JobOpportunityRepository
 import io.ktor.client.HttpClient
 import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.viewModelOf
@@ -35,6 +37,8 @@ val appModule = module {
     single<HttpClient> { HttpClientProvider.client }
     single { EmployeeRepository(get()) }
     single { AuthRepository(get()) }
+    single { CompanyRepository(get()) }
+    single { JobOpportunityRepository(get()) }
     single { WebSocketManager(get()) }
 }
 

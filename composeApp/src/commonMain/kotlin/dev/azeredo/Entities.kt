@@ -35,12 +35,13 @@ data class JobOpportunity(
     val description: String,
     val category: String,
     val address: String,
-    val location: Location,
+    val latitude: Double,
+    val longitude: Double,
     @SerialName("start_date_time") val startDateTime: String,
-    @SerialName("duration_in_hours")  val durationInHours: Int,
-    @SerialName("pay_rate")  val payRate: Double,
+    @SerialName("duration_in_hours") val durationInHours: Int,
+    @SerialName("pay_rate") val payRate: Double,
     val status: JobStatus,
-    @SerialName("company_name") val companyName: String,
+    @SerialName("company_name") val companyName: String? = null,
     @SerialName("company_logo_url") val companyLogoUrl: String? = null
 )
 
@@ -57,4 +58,32 @@ data class NewUser(
 @Serializable
 enum class JobStatus {
     OPEN, PENDING, COMPLETED, CANCELLED
+}
+
+
+// SIGLETONS
+object EmployeeManager {
+    var currentEmployee: Employee? = null
+        private set
+
+    fun updateEmployee(employee: Employee) {
+        currentEmployee = employee
+    }
+
+    fun clearEmployee() {
+        currentEmployee = null
+    }
+}
+
+object CompanyManager {
+    var currentCompany: Company? = null
+        private set
+
+    fun updateCompany(company: Company) {
+        currentCompany = company
+    }
+
+    fun clearCompany() {
+        currentCompany = null
+    }
 }
