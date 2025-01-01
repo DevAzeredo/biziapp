@@ -4,6 +4,7 @@ import dev.azeredo.JobOpportunity
 import dev.azeredo.api.AuthManager
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -15,7 +16,7 @@ import kotlinx.coroutines.withContext
 class JobOpportunityRepository(private val httpClient: HttpClient) {
     suspend fun createJobOpportunity(jobOpportunity: JobOpportunity): JobOpportunity {
         return withContext(Dispatchers.IO) {
-            httpClient.post("$BASE_URL/jobs") {
+            httpClient.post("http://$BASE_URL/jobs") {
                 headers {
                     append(HttpHeaders.ContentType, "application/json")
                     append(HttpHeaders.Authorization, "Bearer ${AuthManager.getToken()}")
@@ -23,5 +24,16 @@ class JobOpportunityRepository(private val httpClient: HttpClient) {
                 setBody(jobOpportunity)
             }.body()
         }
+    }
+
+    suspend fun getJobOpportunityById(id: Long): JobOpportunity? {
+        val jobList: List<JobOpportunity> =  withContext(Dispatchers.IO) {
+            httpClient.get("http://$BASE_URL/jobs/$id") {
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer ${AuthManager.getToken()}")
+                }
+            }.body()
+        }
+        return jobList.firstOrNull()
     }
 }

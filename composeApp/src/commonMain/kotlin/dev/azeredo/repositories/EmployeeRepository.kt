@@ -19,7 +19,7 @@ import kotlinx.coroutines.withContext
 class EmployeeRepository(private val httpClient: HttpClient) {
     suspend fun createOrUpdateEmployee(employee: Employee): Employee {
         val response: Employee = withContext(Dispatchers.IO) {
-            httpClient.post("https://$BASE_URL/employees") {
+            httpClient.post("http://$BASE_URL/employees") {
                 headers {
                     append(HttpHeaders.ContentType, "application/json")
                     append(HttpHeaders.Authorization, "Bearer ${AuthManager.getToken()}")
@@ -33,7 +33,7 @@ class EmployeeRepository(private val httpClient: HttpClient) {
 
     suspend fun getEmployee(): Employee {
         return withContext(Dispatchers.IO) {
-            httpClient.get("https://$BASE_URL/employees") {
+            httpClient.get("http://$BASE_URL/employees") {
                 headers {
                     append(HttpHeaders.Authorization, "Bearer ${AuthManager.getToken()}")
                 }

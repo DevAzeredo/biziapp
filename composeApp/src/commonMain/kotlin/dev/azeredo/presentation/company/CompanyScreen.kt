@@ -159,28 +159,53 @@ fun CompanyScreen(
 
 @Composable
 fun CardImage(
-    onImageClick: () -> Unit, foto: ByteArray
+    onImageClick: () -> Unit,
+    foto: ByteArray? = null,
+    imageUrl: String? = null
 ) {
     ElevatedCard(
-        modifier = Modifier.size(400.dp).clickable { onImageClick() },
-        ) {
-        if (foto.isNotEmpty()) {
-            val imageLoader = ImageLoader.Builder(LocalPlatformContext.current)
-                .components { add(KmpFileFetcher.Factory()) }.build()
+        modifier = Modifier
+            .size(400.dp)
+            .clickable { onImageClick() },
+    ) {
+        when {
+            !imageUrl.isNullOrEmpty() -> {
+                // Carrega a imagem da URL
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = "Company Logo",
+                    modifier = Modifier
+                        .height(400.dp)
+                        .width(400.dp),
+                    contentScale = ContentScale.Fit
+                )
+            }
+            foto != null && foto.isNotEmpty() -> {
+                // Carrega a imagem do ByteArray
+                val imageLoader = ImageLoader.Builder(LocalPlatformContext.current)
+                    .components { add(KmpFileFetcher.Factory()) }
+                    .build()
 
-            AsyncImage(
-                model = foto,
-                contentDescription = "Company Logo",
-                modifier = Modifier.height(400.dp).width(400.dp),
-                contentScale = ContentScale.Fit,
-                imageLoader = imageLoader
-            )
-        } else {
-            Icon(
-                Icons.Filled.Face,
-                contentDescription = "Placeholder",
-                modifier = Modifier.fillMaxSize().padding(16.dp),
-            )
+                AsyncImage(
+                    model = foto,
+                    contentDescription = "Company Logo",
+                    modifier = Modifier
+                        .height(400.dp)
+                        .width(400.dp),
+                    contentScale = ContentScale.Fit,
+                    imageLoader = imageLoader
+                )
+            }
+            else -> {
+                // Exibe um ícone de placeholder
+                Icon(
+                    Icons.Filled.Face,
+                    contentDescription = "Placeholder",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                )
+            }
         }
     }
 }

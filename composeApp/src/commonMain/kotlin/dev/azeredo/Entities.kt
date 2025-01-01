@@ -57,7 +57,7 @@ data class NewUser(
 
 @Serializable
 enum class JobStatus {
-    OPEN, PENDING, COMPLETED, CANCELLED
+    Open, Pending, Completed, Cancelled
 }
 
 

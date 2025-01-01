@@ -36,6 +36,7 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
                         id = Clock.System.now().toEpochMilliseconds(), message = "senha errada"
                     )
                 )
+                _uiState.value =  _uiState.value.copy(isLoading = false)
             }
         }
     }

@@ -65,7 +65,7 @@ class JobOpportunityViewModel(private val repository: JobOpportunityRepository) 
                 startDateTime = uiState.startDateTime,
                 durationInHours = uiState.durationInHours.toInt(),
                 payRate = uiState.payRate.toDouble(),
-                status = JobStatus.OPEN,
+                status = JobStatus.Open,
                 companyId = CompanyManager.currentCompany?.id,
                 latitude = 0.0,
                 longitude = 0.0

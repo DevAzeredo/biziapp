@@ -15,7 +15,7 @@ import io.ktor.http.contentType
 class AuthRepository(private val httpClient: HttpClient) {
     suspend fun login(signInData: NewUser): String  {
         return withContext(Dispatchers.IO) {
-            httpClient.post("https://$BASE_URL/login") {
+            httpClient.post("http://$BASE_URL/login") {
                 contentType(ContentType.Application.Json)
                 setBody(signInData)
             }.body()
@@ -24,7 +24,7 @@ class AuthRepository(private val httpClient: HttpClient) {
 
     suspend fun register(newUser: NewUser): String {
         return withContext(Dispatchers.IO) {
-            httpClient.post("https://$BASE_URL/register") {
+            httpClient.post("http://$BASE_URL/register") {
                 contentType(ContentType.Application.Json)
                 setBody(newUser)
             }.body()

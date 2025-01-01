@@ -38,6 +38,7 @@ class CompanyViewModel(private val repository: CompanyRepository): ViewModel() {
             logoUrl = if (field == CompanyField.LogoUrl) value else _uiState.value.logoUrl,
         )
     }
+
     fun setPhoto(value:ByteArray){
         _uiState.value = _uiState.value.copy(photo = value)
     }
@@ -54,6 +55,7 @@ class CompanyViewModel(private val repository: CompanyRepository): ViewModel() {
             )
             try {
                 val companyUpdated = repository.createOrUpdateCompany(company)
+             repository.uploadCompanyLogo(uiState.photo)
                 addUiMessage(
                     UiMessage.Success(
                         id = Clock.System.now().toEpochMilliseconds(), message = "Sent successfully"

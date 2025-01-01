@@ -1,6 +1,7 @@
 package dev.azeredo.presentation.main
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -42,6 +43,7 @@ import coil3.compose.AsyncImage
 import com.dokar.sonner.Toaster
 import com.dokar.sonner.listenMany
 import com.dokar.sonner.rememberToasterState
+import dev.azeredo.Constants.BASE_URL
 import dev.azeredo.JobOpportunity
 import dev.azeredo.UiMessage
 import dev.azeredo.presentation.company.CompanyScreen
@@ -107,20 +109,42 @@ fun MainScreen(navigator: Navigator, viewModel: MainViewModel, uiState: MainView
 
 @Composable
 fun JobItem(job: JobOpportunity) {
-    Column(
-        modifier = Modifier.padding(8.dp).background(Color.LightGray).padding(8.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black), // Fundo preto para destacar a imagem
+        contentAlignment = Alignment.Center // Centraliza os textos caso haja overlay
     ) {
+        // Imagem ocupando toda a tela
         job.companyLogoUrl?.let {
             AsyncImage(
-                model = it,
+                model = "http://$BASE_URL/logos/$it",
                 contentDescription = "Company Logo",
-                modifier = Modifier.height(64.dp),
-                contentScale = ContentScale.Fit
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit,
+//                contentScale = ContentScale.Crop // Faz a imagem preencher a tela com corte proporcional
             )
         }
-        Text(text = job.title, color = Color.Black)
-        Text(text = job.companyName ?: "Unknown Company", color = Color.Black)
-        Text(text = job.description, color = Color.Black)
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Bottom
+        ) {
+            Text(
+                text = job.title,
+                color = Color.White,
+            )
+            Text(
+                text = job.companyName ?: "Unknown Company",
+                color = Color.White,
+            )
+            Text(
+                text = job.description,
+                color = Color.White,
+            )
+        }
     }
 }
 

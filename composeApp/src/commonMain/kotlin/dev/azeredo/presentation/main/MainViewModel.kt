@@ -9,6 +9,7 @@ import dev.azeredo.UiMessage
 import dev.azeredo.WebSocketManager
 import dev.azeredo.repositories.CompanyRepository
 import dev.azeredo.repositories.EmployeeRepository
+import dev.azeredo.repositories.JobOpportunityRepository
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +21,7 @@ import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 
 
-class MainViewModel(private val webSocketManager: WebSocketManager,private val employeeRepository: EmployeeRepository, private val companyRepository: CompanyRepository) : ViewModel() {
+class MainViewModel(private val webSocketManager: WebSocketManager,private val employeeRepository: EmployeeRepository, private val companyRepository: CompanyRepository, private val jobRepository: JobOpportunityRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> get() = _uiState.asStateFlow()
@@ -37,6 +38,20 @@ class MainViewModel(private val webSocketManager: WebSocketManager,private val e
             if ((company.id ?: 0) > 0) {
                 CompanyManager.updateCompany(company)
             }
+            try {
+            val jobRe = jobRepository.getJobOpportunityById(1)
+                if  (jobRe != null) {
+                    addJobOpportunity(jobRe)
+                }
+            } catch (e: Exception) {
+                addUiMessage(
+                    UiMessage.Error(
+                        id = Clock.System.now().toEpochMilliseconds(), message = "${e.message}"
+                    )
+                )
+            }
+
+          //  _uiState.value = _uiState.value.copy(jobAccepted = jobRe, foundedJob = true)
         }
     }
 

@@ -27,6 +27,7 @@ object AuthManager {
 object HttpClientProvider {
     val client: HttpClient by lazy {
         HttpClient() {
+
             install(WebSockets)
             install(ContentNegotiation) {
                 json(Json {
