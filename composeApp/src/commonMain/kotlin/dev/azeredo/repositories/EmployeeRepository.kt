@@ -5,6 +5,7 @@ import dev.azeredo.Employee
 import dev.azeredo.api.AuthManager
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
@@ -32,12 +33,31 @@ class EmployeeRepository(private val httpClient: HttpClient) {
     }
 
     suspend fun getEmployee(): Employee {
-        return withContext(Dispatchers.IO) {
-            httpClient.get("http://$BASE_URL/employees") {
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer ${AuthManager.getToken()}")
+        return withContext(Dispatchers.Default) {
+            try {
+                httpClient.get("http://$BASE_URL/employees") {
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer ${AuthManager.getToken()}")
+                    }
+                }.body()
+            } catch (e: ClientRequestException) {
+                if (e.response.status.value == 404) {
+                    Employee(
+                        fullName =  "",
+                        dateOfBirth = "",
+                        gender = "",
+                        email = "",
+                        phone = "",
+                        residentialAddress = "",
+                        isAvailable = false,
+                        latitude = 0.0,
+                        longitude = 0.0,
+                        rating = 0.0
+                    )
+                } else {
+                    throw e
                 }
-            }.body()
+            }
         }
     }
 }

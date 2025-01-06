@@ -6,6 +6,7 @@ import dev.azeredo.Employee
 import dev.azeredo.api.AuthManager
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
@@ -37,11 +38,24 @@ class CompanyRepository(private val httpClient: HttpClient) {
 
     suspend fun getCompany(): Company {
         return withContext(Dispatchers.IO) {
-            httpClient.get("http://$BASE_URL/companies") {
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer ${AuthManager.getToken()}")
-                }
-            }.body()
+            try {
+                httpClient.get("http://$BASE_URL/companies") {
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer ${AuthManager.getToken()}")
+                    }
+                }.body<Company>()
+            } catch (e: Exception) {
+//                if (e.response.status.value == 404) {
+                    // Se a resposta for 404, retorna uma Company default
+                     Company(
+                        logoUrl = "",
+                        id = null,
+                        name = "",
+                        address = "",
+                        description = "",
+                    )
+
+            }
         }
     }
 
@@ -62,6 +76,7 @@ class CompanyRepository(private val httpClient: HttpClient) {
                 }
                 setBody(multipartBody)
             }.body()
+
         }
     }
 }
