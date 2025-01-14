@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
@@ -51,6 +53,7 @@ import dev.azeredo.presentation.employee.EmployeeScreen
 import dev.azeredo.presentation.jobopportunity.JobOpportunityScreen
 import dev.azeredo.toToast
 import kotlinx.coroutines.flow.map
+import kotlinx.datetime.Clock
 import org.koin.compose.viewmodel.koinViewModel
 
 class MainScreen : Screen {
@@ -90,7 +93,7 @@ fun MainScreen(navigator: Navigator, viewModel: MainViewModel, uiState: MainView
                         }
                     }
 
-                    uiState.foundedJob && (uiState.jobAccepted?.id ?:0)>0 -> {
+                    uiState.foundedJob && (uiState.jobAccepted?.id ?: 0) > 0 -> {
                         JobItem(uiState.jobAccepted!!)
                     }
 
@@ -112,17 +115,18 @@ fun JobItem(job: JobOpportunity) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black), // Fundo preto para destacar a imagem
-        contentAlignment = Alignment.Center // Centraliza os textos caso haja overlay
+            .background(Color.Black),
+        contentAlignment = Alignment.Center
     ) {
-        // Imagem ocupando toda a tela
-        job.companyLogoUrl?.let {
+        job.company.logoUrl?.let { logoUrl ->
             AsyncImage(
-                model = "http://$BASE_URL/logos/$it",
+// alterar, isso daqui é gambi pra fazer rapido
+                model = "https://$BASE_URL/api/companies/logos/$logoUrl?timestamp=${Clock.System.now()}",
                 contentDescription = "Company Logo",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit,
-//                contentScale = ContentScale.Crop // Faz a imagem preencher a tela com corte proporcional
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(16f / 9f),
+                contentScale = ContentScale.FillHeight,
             )
         }
 
@@ -137,7 +141,7 @@ fun JobItem(job: JobOpportunity) {
                 color = Color.White,
             )
             Text(
-                text = job.companyName ?: "Unknown Company",
+                text = job.company.name ?: "Unknown Company",
                 color = Color.White,
             )
             Text(

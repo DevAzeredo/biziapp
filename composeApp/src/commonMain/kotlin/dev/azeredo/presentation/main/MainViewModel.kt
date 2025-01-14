@@ -30,7 +30,7 @@ class MainViewModel(private val webSocketManager: WebSocketManager,private val e
         viewModelScope.launch {
             webSocketManager.connect()
             collectWebSocketMessages()
-
+            try {
             val employe = employeeRepository.getEmployee()
             if ((employe.id ?: 0) > 0) {
                 EmployeeManager.updateEmployee(employe)
@@ -39,7 +39,7 @@ class MainViewModel(private val webSocketManager: WebSocketManager,private val e
             if ((company.id ?: 0) > 0) {
                 CompanyManager.updateCompany(company)
             }
-            try {
+
             val jobRe = jobRepository.getJobOpportunityById(1)
                 if  (jobRe != null) {
                     addJobOpportunity(jobRe)

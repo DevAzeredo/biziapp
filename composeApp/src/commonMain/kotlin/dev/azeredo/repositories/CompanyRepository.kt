@@ -25,7 +25,7 @@ import kotlinx.coroutines.withContext
 class CompanyRepository(private val httpClient: HttpClient) {
     suspend fun createOrUpdateCompany(company: Company): Company {
         return withContext(Dispatchers.IO) {
-            httpClient.post("http://$BASE_URL/companies") {
+            httpClient.post("https://$BASE_URL/api/companies") {
                 headers {
                     append(HttpHeaders.ContentType, "application/json")
                     append(HttpHeaders.Authorization, "Bearer ${AuthManager.getToken()}")
@@ -39,7 +39,7 @@ class CompanyRepository(private val httpClient: HttpClient) {
     suspend fun getCompany(): Company {
         return withContext(Dispatchers.IO) {
             try {
-                httpClient.get("http://$BASE_URL/companies") {
+                httpClient.get("https://$BASE_URL/api/companies") {
                     headers {
                         append(HttpHeaders.Authorization, "Bearer ${AuthManager.getToken()}")
                     }
@@ -70,7 +70,7 @@ class CompanyRepository(private val httpClient: HttpClient) {
                 }
             )
 
-            httpClient.post("http://$BASE_URL/companies/upload-logo") {
+            httpClient.post("https://$BASE_URL/api/companies/upload-logo") {
                 headers {
                     append(HttpHeaders.Authorization, "Bearer ${AuthManager.getToken()}")
                 }

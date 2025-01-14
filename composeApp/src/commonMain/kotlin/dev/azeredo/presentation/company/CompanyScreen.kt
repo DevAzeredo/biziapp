@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -55,10 +56,12 @@ import com.mohamedrejeb.calf.picker.FilePickerFileType
 import com.mohamedrejeb.calf.picker.FilePickerSelectionMode
 import com.mohamedrejeb.calf.picker.coil.KmpFileFetcher
 import com.mohamedrejeb.calf.picker.rememberFilePickerLauncher
+import dev.azeredo.Constants.BASE_URL
 import dev.azeredo.UiMessage
 import dev.azeredo.toToast
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import org.koin.compose.viewmodel.koinViewModel
 
 class CompanyScreen : Screen {
@@ -121,8 +124,11 @@ fun CompanyScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-                CardImage(onImageClick = { pickerLauncher.launch() }, foto = uiState.photo)
+                CardImage(
+                    onImageClick = { pickerLauncher.launch() },
+                    foto = uiState.photo,
+                    imageUrl = uiState.logoUrl
+                )
 
                 TextField(value = uiState.name, onValueChange = {
                     viewModel.onFieldChange(
@@ -161,7 +167,7 @@ fun CompanyScreen(
 fun CardImage(
     onImageClick: () -> Unit,
     foto: ByteArray? = null,
-    imageUrl: String? = null
+    imageUrl: String? = null,
 ) {
     ElevatedCard(
         modifier = Modifier
@@ -169,17 +175,18 @@ fun CardImage(
             .clickable { onImageClick() },
     ) {
         when {
-            !imageUrl.isNullOrEmpty() -> {
-                // Carrega a imagem da URL
-                AsyncImage(
-                    model = imageUrl,
+            // se nao selecionou nenhum foto e tem a url da imagem
+            !imageUrl.isNullOrEmpty() && foto?.isEmpty() ?: true -> {
+                AsyncImage( // alterar, isso daqui é gambi pra fazer rapido
+                    model = "https://$BASE_URL/api/companies/logos/$imageUrl?timestamp=${Clock.System.now()}",
                     contentDescription = "Company Logo",
                     modifier = Modifier
-                        .height(400.dp)
-                        .width(400.dp),
-                    contentScale = ContentScale.Fit
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f),
+                    contentScale = ContentScale.FillHeight,
                 )
             }
+
             foto != null && foto.isNotEmpty() -> {
                 // Carrega a imagem do ByteArray
                 val imageLoader = ImageLoader.Builder(LocalPlatformContext.current)
@@ -196,6 +203,7 @@ fun CardImage(
                     imageLoader = imageLoader
                 )
             }
+
             else -> {
                 // Exibe um ícone de placeholder
                 Icon(

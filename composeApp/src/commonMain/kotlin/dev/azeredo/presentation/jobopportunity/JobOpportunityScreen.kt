@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -23,6 +24,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -99,23 +101,35 @@ fun JobOpportunityRegistration(
                         JobOpportunityViewModel.JobOpportunityField.StartDateTime, it
                     )
                 }, label = { Text("Start Time") })
-                TextField(value = uiState.durationInHours, onValueChange = {
-                    viewModel.onFieldChange(
-                        JobOpportunityViewModel.JobOpportunityField.DurationInHours, it
-                    )
-                }, label = { Text("End Time") })
+                TextField(
+                    value = uiState.durationInHours,
+                    onValueChange = {
+                        viewModel.onFieldChange(
+                            JobOpportunityViewModel.JobOpportunityField.DurationInHours, it
+                        )
+                    },
+                    label = { Text("End Time") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
 
-                TextField(value = uiState.payRate, onValueChange = {
-                    viewModel.onFieldChange(
-                        JobOpportunityViewModel.JobOpportunityField.PayRate, it
-                    )
-                }, label = { Text("Pay Rate") })
+                TextField(
+                    value = uiState.payRate,
+                    onValueChange = { newValue ->
+                        if (newValue.matches(Regex("^\\d*\\.?\\d{0,2}$"))) {
+                            viewModel.onFieldChange(
+                                JobOpportunityViewModel.JobOpportunityField.PayRate,
+                                newValue
+                            )
+                        }
+                    },
+                    label = { Text("Pay Rate") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
 
                 Button(onClick = { viewModel.onSubmit() }, enabled = !uiState.isSubmitting) {
                     if (uiState.isSubmitting) {
                         CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            strokeWidth = 2.dp
+                            modifier = Modifier.size(24.dp), strokeWidth = 2.dp
                         )
                     } else {
                         Text("Submit")

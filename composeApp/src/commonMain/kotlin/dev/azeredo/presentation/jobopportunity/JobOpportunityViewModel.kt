@@ -2,6 +2,7 @@ package dev.azeredo.presentation.jobopportunity
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.azeredo.Company
 import dev.azeredo.CompanyManager
 import dev.azeredo.JobOpportunity
 import dev.azeredo.JobStatus
@@ -30,13 +31,8 @@ class JobOpportunityViewModel(private val repository: JobOpportunityRepository) 
             JobOpportunityField.Category -> _uiState.value.copy(category = value)
             JobOpportunityField.Address -> _uiState.value.copy(address = value)
             JobOpportunityField.StartDateTime -> _uiState.value.copy(startDateTime = value)
-            JobOpportunityField.DurationInHours -> _uiState.value.copy(
-                durationInHours = ""
-            )
-
-            JobOpportunityField.PayRate -> _uiState.value.copy(
-                payRate = ""
-            )
+            JobOpportunityField.DurationInHours -> _uiState.value.copy(durationInHours = value)
+            JobOpportunityField.PayRate -> _uiState.value.copy(payRate = value)
         }
     }
 
@@ -53,39 +49,45 @@ class JobOpportunityViewModel(private val repository: JobOpportunityRepository) 
 
     fun onSubmit() {
         _uiState.value = _uiState.value.copy(isSubmitting = true)
-        viewModelScope.launch {
-            val uiState = _uiState.value
+
+         viewModelScope.launch {
+             try {
             val jobOpportunity = JobOpportunity(
-                title = uiState.title,
-                description = uiState.description,
-                companyName = uiState.companyName,
-                companyLogoUrl = uiState.companyLogoUrl,
-                category = uiState.category,
-                address = uiState.address,
-                startDateTime = uiState.startDateTime,
-                durationInHours = uiState.durationInHours.toInt(),
-                payRate = uiState.payRate.toDouble(),
-                status = JobStatus.Open,
-                companyId = CompanyManager.currentCompany?.id,
+                title = uiState.value.title,
+                description = uiState.value.description,
+                company = CompanyManager.currentCompany ?: Company(
+                    id = 0,
+                    logoUrl = "",
+                    address = "",
+                    description = "",
+                    name = ""
+                ),
+                category = uiState.value.category,
+                address = uiState.value.address,
+                startDateTime = uiState.value.startDateTime,
+                durationInHours = uiState.value.durationInHours.toInt(),
+                payRate = uiState.value.payRate.toDouble(),
+                status = JobStatus.OPEN.toString(),
                 latitude = 0.0,
                 longitude = 0.0
             )
 
-            try {
-               repository.createJobOpportunity(jobOpportunity)
+
+                repository.createJobOpportunity(jobOpportunity)
                 addUiMessage(
                     UiMessage.Success(
                         id = Clock.System.now().toEpochMilliseconds(), message = "Sent successfully"
                     )
                 )
                 _uiState.value = _uiState.value.copy(isSubmitting = false, sent = true)
-            } catch (e: Exception) {
-                addUiMessage(
-                    UiMessage.Error(
-                        id = Clock.System.now().toEpochMilliseconds(), message = "${e.message}"
-                    )
-                )
             }
+             catch (e: Exception) {
+                 addUiMessage(
+                     UiMessage.Error(
+                         id = Clock.System.now().toEpochMilliseconds(), message = "${e.message}"
+                     )
+                 )
+             }
         }
     }
 

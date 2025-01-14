@@ -4,7 +4,8 @@ import com.dokar.sonner.Toast
 import com.dokar.sonner.ToastType
 
 object Constants {
-    const val BASE_URL = "192.168.1.143:9854"
+    const val BASE_URL = "8080-idx-bizi-back-1736449039718.cluster-m7tpz3bmgjgoqrktlvd4ykrc2m.cloudworkstations.dev"
+
 }
 //"http://35.208.151.171:8080/logos/
 sealed class UiMessage(val id: Long, val message: String) {
