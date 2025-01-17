@@ -18,6 +18,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -25,7 +26,7 @@ import kotlinx.coroutines.withContext
 class CompanyRepository(private val httpClient: HttpClient) {
     suspend fun createOrUpdateCompany(company: Company): Company {
         return withContext(Dispatchers.IO) {
-            httpClient.post("https://$BASE_URL/api/companies") {
+            httpClient.post("http://$BASE_URL/api/companies") {
                 headers {
                     append(HttpHeaders.ContentType, "application/json")
                     append(HttpHeaders.Authorization, "Bearer ${AuthManager.getToken()}")
@@ -38,39 +39,35 @@ class CompanyRepository(private val httpClient: HttpClient) {
 
     suspend fun getCompany(): Company {
         return withContext(Dispatchers.IO) {
-            try {
-                httpClient.get("https://$BASE_URL/api/companies") {
-                    headers {
-                        append(HttpHeaders.Authorization, "Bearer ${AuthManager.getToken()}")
-                    }
-                }.body<Company>()
-            } catch (e: Exception) {
-//                if (e.response.status.value == 404) {
-                    // Se a resposta for 404, retorna uma Company default
-                     Company(
-                        logoUrl = "",
-                        id = null,
-                        name = "",
-                        address = "",
-                        description = "",
-                    )
-
+            val resp = httpClient.get("http://$BASE_URL/api/companies") {
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer ${AuthManager.getToken()}")
+                }
+            }
+            if (resp.status.isSuccess()) {
+                resp.body()
+            } else {
+                Company(
+                    logoUrl = "",
+                    id = null,
+                    name = "",
+                    address = "",
+                    description = "",
+                )
             }
         }
     }
 
     suspend fun uploadCompanyLogo(imageBytes: ByteArray): String {
         return withContext(Dispatchers.IO) {
-            val multipartBody = MultiPartFormDataContent(
-                formData {
-                    append("logo", imageBytes, Headers.build {
-                        append(HttpHeaders.ContentDisposition, "filename=logo.png")
-                        append(HttpHeaders.ContentType, "image/png")
-                    })
-                }
-            )
+            val multipartBody = MultiPartFormDataContent(formData {
+                append("logo", imageBytes, Headers.build {
+                    append(HttpHeaders.ContentDisposition, "filename=logo.png")
+                    append(HttpHeaders.ContentType, "image/png")
+                })
+            })
 
-            httpClient.post("https://$BASE_URL/api/companies/upload-logo") {
+            httpClient.post("http://$BASE_URL/api/companies/upload-logo") {
                 headers {
                     append(HttpHeaders.Authorization, "Bearer ${AuthManager.getToken()}")
                 }

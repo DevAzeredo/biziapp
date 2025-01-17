@@ -28,7 +28,7 @@ class WebSocketManager(private val httpClient: HttpClient) {
     suspend fun connect() {
         try {
             session = httpClient.webSocketSession {
-                url("wss://$BASE_URL/ws")
+                url("ws://$BASE_URL/ws")
             }
             println("Conexão WebSocket estabelecida")
 

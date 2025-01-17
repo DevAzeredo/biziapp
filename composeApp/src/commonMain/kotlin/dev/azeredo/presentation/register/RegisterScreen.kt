@@ -45,7 +45,6 @@ class RegisterScreen : Screen {
 fun RegisterScreenContent(
     navigator: Navigator, uiState: RegisterViewModel.RegisterUiState, viewModel: RegisterViewModel
 ) {
-
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

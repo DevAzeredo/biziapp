@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -55,6 +57,7 @@ import dev.azeredo.toToast
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Duration.Companion.milliseconds
 
 class MainScreen : Screen {
     @Composable
@@ -93,8 +96,8 @@ fun MainScreen(navigator: Navigator, viewModel: MainViewModel, uiState: MainView
                         }
                     }
 
-                    uiState.foundedJob && (uiState.jobAccepted?.id ?: 0) > 0 -> {
-                        JobItem(uiState.jobAccepted!!)
+                    uiState.foundedJob && (uiState.jobOpportunity?.id ?: 0) > 0 -> {
+                        JobItem(uiState.jobOpportunity!!)
                     }
 
                     else -> {
@@ -120,8 +123,7 @@ fun JobItem(job: JobOpportunity) {
     ) {
         job.company.logoUrl?.let { logoUrl ->
             AsyncImage(
-// alterar, isso daqui é gambi pra fazer rapido
-                model = "https://$BASE_URL/api/companies/logos/$logoUrl?timestamp=${Clock.System.now()}",
+                model = "http://$BASE_URL/api/companies/logos/$logoUrl?timestamp=${Clock.System.now()}",
                 contentDescription = "Company Logo",
                 modifier = Modifier
                     .fillMaxWidth()
@@ -136,18 +138,11 @@ fun JobItem(job: JobOpportunity) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.Bottom
         ) {
-            Text(
-                text = job.title,
-                color = Color.White,
-            )
-            Text(
-                text = job.company.name ?: "Unknown Company",
-                color = Color.White,
-            )
-            Text(
-                text = job.description,
-                color = Color.White,
-            )
+            Text(text = job.title, color = Color.White)
+            Text(text = job.company.name ?: "Unknown Company", color = Color.White)
+            Text(text = job.description, color = Color.White)
+
+
         }
     }
 }

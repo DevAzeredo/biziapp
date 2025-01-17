@@ -178,7 +178,7 @@ fun CardImage(
             // se nao selecionou nenhum foto e tem a url da imagem
             !imageUrl.isNullOrEmpty() && foto?.isEmpty() ?: true -> {
                 AsyncImage( // alterar, isso daqui é gambi pra fazer rapido
-                    model = "https://$BASE_URL/api/companies/logos/$imageUrl?timestamp=${Clock.System.now()}",
+                    model = "http://$BASE_URL/api/companies/logos/$imageUrl?timestamp=${Clock.System.now()}",
                     contentDescription = "Company Logo",
                     modifier = Modifier
                         .fillMaxWidth()
